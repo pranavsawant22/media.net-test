@@ -55,6 +55,8 @@ Return the response as JSON in this exact format:
         });
 
         const result = JSON.parse(response.text || "{}");
+        console.log(result);
+
         return result.adCopies || [];
     } catch (error) {
         throw new Error(`Failed to generate ad copy with Gemini: ${error}`);
