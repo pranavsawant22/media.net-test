@@ -8,7 +8,8 @@
     "target": "ES2020",
     "moduleResolution": "Node",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": false   // ✅ override here
   },
   "include": ["server", "shared"]
 }
