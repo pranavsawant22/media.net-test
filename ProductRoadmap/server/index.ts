@@ -1,42 +1,13 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { setupVite, serveStatic, log } from "../viteServer";
+import { setupVite, serveStatic, log } from "./viteServer";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-      log(logLine);
-    }
-  });
-
-  next();
-});
-
 (async () => {
+  // API routes FIRST
   await registerRoutes(app);
 
   // Error middleware
@@ -46,14 +17,13 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
   });
 
-  // Serve frontend
+  // Frontend: only catch non-API routes
   if (app.get("env") === "development") {
     await setupVite(app);
   } else {
     serveStatic(app);
   }
 
-  // Railway: must listen on process.env.PORT
   const port = parseInt(process.env.PORT || "5000", 10);
   app.listen(port, "0.0.0.0", () => {
     log(`🚀 Server running on port ${port}`);
