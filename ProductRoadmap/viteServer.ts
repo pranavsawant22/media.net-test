@@ -3,30 +3,28 @@ import express from "express";
 import type { Express } from "express";
 import { createServer as createViteServer } from "vite";
 
-// ✅ Utility log function
 export function log(message: string) {
   console.log(`[server] ${message}`);
 }
 
-// ✅ Setup Vite in dev mode
+// ✅ Development: use Vite middleware
 export async function setupVite(app: Express) {
   const vite = await createViteServer({
     server: { middlewareMode: true },
-    root: path.resolve(import.meta.dirname, "client"),
+    root: path.resolve(import.meta.dirname, "../client"),
   });
 
-  // Let Vite handle frontend in dev
   app.use(vite.middlewares);
 }
 
-// ✅ Serve static frontend in production
+// ✅ Production: serve built frontend
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "dist");
+  const distPath = path.resolve(import.meta.dirname, "../dist");
 
-  // Serve built static assets
+  // Serve static assets
   app.use(express.static(distPath));
 
-  // Catch-all for non-API routes (React Router)
+  // ❌ DO NOT touch /api/* routes
   app.get(/^\/(?!api).*/, (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
