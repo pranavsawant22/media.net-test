@@ -1,17 +1,15 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCampaignSchema } from "@shared/schema";
 import { generateAdCopyWithGemini } from "./gemini";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  
+export async function registerRoutes(app: Express) {
   // Get all campaigns
-  app.get("/api/campaigns", async (req, res) => {
+  app.get("/api/campaigns", async (_req, res) => {
     try {
       const campaigns = await storage.getCampaigns();
       res.json(campaigns);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: "Failed to fetch campaigns" });
     }
   });
@@ -22,7 +20,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaignData = insertCampaignSchema.parse(req.body);
       const campaign = await storage.createCampaign(campaignData);
       res.json(campaign);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: "Invalid campaign data" });
     }
   });
@@ -35,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Campaign not found" });
       }
       res.json(campaign);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: "Failed to fetch campaign" });
     }
   });
@@ -49,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Campaign not found" });
       }
       res.json(campaign);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: "Failed to update campaign" });
     }
   });
@@ -58,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate-ad-copy-gemini", async (req, res) => {
     try {
       const { productDescription, objective } = req.body;
-      
+
       if (!productDescription) {
         return res.status(400).json({ error: "Product description is required" });
       }
@@ -70,7 +68,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to generate ad copy" });
     }
   });
-
-  const httpServer = createServer(app);
-  return httpServer;
 }
