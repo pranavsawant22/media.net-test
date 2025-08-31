@@ -7,24 +7,20 @@ export function log(message: string) {
   console.log(`[server] ${message}`);
 }
 
-// ✅ Development: use Vite middleware
 export async function setupVite(app: Express) {
   const vite = await createViteServer({
     server: { middlewareMode: true },
     root: path.resolve(import.meta.dirname, "../client"),
   });
-
   app.use(vite.middlewares);
 }
 
-// ✅ Production: serve built frontend
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, "../dist");
 
-  // Serve static assets
   app.use(express.static(distPath));
 
-  // ❌ DO NOT touch /api/* routes
+  // React SPA catch-all, but exclude /api/*
   app.get(/^\/(?!api).*/, (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
