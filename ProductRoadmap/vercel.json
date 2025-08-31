@@ -1,17 +1,18 @@
 {
+  "version": 2,
   "buildCommand": "npm run build:client",
   "outputDirectory": "client/dist",
-  "devCommand": "npm run dev:client",
   "installCommand": "npm install",
+  "devCommand": "npm run dev:client",
   "functions": {
-    "server/index.ts": {
+    "api/*.ts": {
       "runtime": "@vercel/node@2.0.0"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/server/index.ts"
+      "destination": "/api/$1"
     },
     {
       "source": "/(.*)",
